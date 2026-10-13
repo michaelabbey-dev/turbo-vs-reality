@@ -50,23 +50,35 @@ I also found that when i requested for the real world MPG for 41952, there was n
 
  12 Oct: explored the menu endpoints, found the mpgData field.
 
+
 ID: 38248
  1.5T 6s manual results:
  Engine Type: TurboCharged
+ Transmission: Manual 6-spd
  Offical figures Rounded: city08:31, highway08:42, comb08:35, 
  Offical figures Unrounded: city08:30.9997, highway08:42.1485, comb08:35.1882, 
  Real world summary: avgMPG:38.280173986, recordcount:2, cityPercent:51, highwayPercent:49, maxMpg:46, minMpg:33,  
- Driver record:Mpg:46.2, cityPercent:20, highwayPercent:80, recordCount: matches
+ Driver record1:Mpg:46.2, cityPercent:20, highwayPercent:80 , lastdate: 2018-02-23T00:00:00-05:00
+ Driver record2:Mpg:32.678302361, cityPercent:83, highwayPercent:18, lastdate: 2018-01-04T00:00:00-05:00
 
- ID: 38246
- 2.0 NA 6s Automatic results:
+ ID: 38247
+ 2.0 NA CVT Auto results:
  Engine Type: Naturally Aspirated NA
+ Transmission:Automatic (variable gear ratios) CVT
  Offical figures Rounded: city08:28, highway08:40, comb08:32, 
  Offical figures Unrounded: city08:28.0, highway08:40.0499, comb08:32.3846, 
  Real world summary: avgMPG:57.0, recordcount:1, cityPercent:10, highwayPercent:90, maxMpg:57, minMpg:57,  
- Driver record:Mpg:57, cityPercent:10, highwayPercent:90, recordCount: matches
+ Driver record:Mpg:57, cityPercent:10, highwayPercent:90, recordCount: 1, lastdate: 2020-05-30T00:00:00-04:00
 Side note: no results for manual 2.0 NA engine
- 
 
- 13 Oct: explored 1.5t and 2.0 NA engines, 1.5t manuel ID 38248, 2.0 NA Auto ID 38246
+The comparisons of these two results show that the gap for Naturally Aspirated engines and Turbocharged is massive, however these results tell me a lot and nothing at the same time.
+First off, the sample used for the Civics is tiny, there is a total of 3 driver records, which indicates that there should be a minimun recordCount before using a vehicles real-world figures.
+The next point is that the 57mpg figure for 2.0 NA engine is most likey an outlier of a result. This is well above the the car's offical highway figure of 40mpg. There could be a few factors for this figure, a data entry mistake, someone driving extremely economical or even a short sample.For the process of cleaning the data, i will most likey flag any extreme outliers, as excluding them is not accurate as it may actually be achievable in some rare cases. 
+
+Another finding was the driving mix between the two engine types. The NA driver did 90% highway miles, which is unfair to compare against the 49% and 18% for the driver record of the 1.5T engines. Using the comb08 as the measurement for this isn't fair, so i will most likey calculate the offical figure for each driver's own mix, resulting in the harmonic mix.
+
+Another comparision is the transmission types. A manual and an CVT transmission differ in gearboxes, which is an example of a cofounder in this case.
+
+ 
+ 13 Oct: explored 1.5t and 2.0 NA engines, 1.5t manuel ID 38248, 2.0 NA Auto ID 38247
 
