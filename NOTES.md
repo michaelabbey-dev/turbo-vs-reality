@@ -49,3 +49,24 @@ I also found that when i requested for the real world MPG for 41952, there was n
 
 
  12 Oct: explored the menu endpoints, found the mpgData field.
+
+ID: 38248
+ 1.5T 6s manual results:
+ Engine Type: TurboCharged
+ Offical figures Rounded: city08:31, highway08:42, comb08:35, 
+ Offical figures Unrounded: city08:30.9997, highway08:42.1485, comb08:35.1882, 
+ Real world summary: avgMPG:38.280173986, recordcount:2, cityPercent:51, highwayPercent:49, maxMpg:46, minMpg:33,  
+ Driver record:Mpg:46.2, cityPercent:20, highwayPercent:80, recordCount: matches
+
+ ID: 38246
+ 2.0 NA 6s Automatic results:
+ Engine Type: Naturally Aspirated NA
+ Offical figures Rounded: city08:28, highway08:40, comb08:32, 
+ Offical figures Unrounded: city08:28.0, highway08:40.0499, comb08:32.3846, 
+ Real world summary: avgMPG:57.0, recordcount:1, cityPercent:10, highwayPercent:90, maxMpg:57, minMpg:57,  
+ Driver record:Mpg:57, cityPercent:10, highwayPercent:90, recordCount: matches
+Side note: no results for manual 2.0 NA engine
+ 
+
+ 13 Oct: explored 1.5t and 2.0 NA engines, 1.5t manuel ID 38248, 2.0 NA Auto ID 38246
+
