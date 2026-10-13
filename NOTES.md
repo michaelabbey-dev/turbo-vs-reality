@@ -79,6 +79,9 @@ Another finding was the driving mix between the two engine types. The NA driver 
 
 Another comparision is the transmission types. A manual and an CVT transmission differ in gearboxes, which is an example of a cofounder in this case.
 
+Driving mix percentages: Some driver records don't add up to 100% (e.g. vehicle 38248, driver 2: 83% city + 18% highway = 101%). I checked the raw response, and this is in the data, not a mistake in my notes. Where the total is between 95 and 105, I'll treat the difference as rounding and rescale both values so they sum to 100% (83/18 becomes 82.2/17.8). Where it's outside that range, or both are zero, I'll flag the record and exclude it from the mix-adjusted comparison, but keep it in the data. I'll keep the raw percentages alongside the rescaled ones so the change is visible. Once I have the full dataset, I'll count how many records fall outside the tolerance to check the rule is sensible.
+
+Dates: lastDate comes back as a timestamp with a timezone offset (e.g. 2018-02-23T00:00:00-05:00).  I'll keep only the date (2018-02-23), since I only need it at day or year level for checking how recent a record is. The raw string stays in staging and the clean date goes in the final table.
  
  13 Oct: explored 1.5t and 2.0 NA engines, 1.5t manuel ID 38248, 2.0 NA Auto ID 38247
 
