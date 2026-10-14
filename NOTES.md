@@ -1,15 +1,15 @@
-##This project is answering the question of "Comparing the offical data to the real world MPG for turbocharged cars and naturally aspirated
+## This project is answering the question of "Comparing the offical data to the real world MPG for turbocharged cars and naturally aspirated
 
 Audience: someone buying a used car who is choosing between a small turbocharged engine and a larger naturally aspirated one, and wants to know whether the turbo's official MPG advantage holds up in real-world driving.
 
-##API
+## API
 The API studied for this project is from the U.S Deparment of Energy, does not require a key for access and it naturally returns XMl by default. 
 
 To get the data returned as JSON instead, send the request header `Accept: application/json` 
 
 https://www.fueleconomy.gov/
 
-##Endpoints explored
+## Endpoints explored
 https://www.fueleconomy.gov/ws/rest/vehicle/menu/year
  The returned XML from this endpoint is the year of  available models years. 
 
@@ -30,7 +30,7 @@ https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/41952
 This endpoint return no results, there was no error 500 at all.
 
 
-##Things i found
+## Things i found
 A malformed vehicle ID (e.g. with curly brackets) returns a 500 server error rather than a 400 (bad request) or 404 (not found). This means my script can't tell from the status code alone whether the server failed or I sent a bad request, so I can't just retry every 500. I'll need to validate IDs before sending them and limit how many times a failed request is retried.
 
 https://www.fueleconomy.gov/ws/rest/vehicle/{41952}
@@ -48,7 +48,7 @@ I also found that when i requested for the real world MPG for 41952, there was n
  This API was decided over the MOT API as it did not require a key and a 5 day wait for approval. The MoT API requires the reg number for each lookup, whereas this API i can lookup any vehicle by usin the menu. In particular, it has direct turbo and supercharger fields, which is more suited to my question.
 
 
- 12 Oct: explored the menu endpoints, found the mpgData field.
+ ## 12 Oct: explored the menu endpoints, found the mpgData field.
 
 
 ID: 38248
@@ -83,5 +83,87 @@ Driving mix percentages: Some driver records don't add up to 100% (e.g. vehicle 
 
 Dates: lastDate comes back as a timestamp with a timezone offset (e.g. 2018-02-23T00:00:00-05:00).  I'll keep only the date (2018-02-23), since I only need it at day or year level for checking how recent a record is. The raw string stays in staging and the clean date goes in the final table.
  
- 13 Oct: explored 1.5t and 2.0 NA engines, 1.5t manuel ID 38248, 2.0 NA Auto ID 38247
+ ## 13 Oct: explored 1.5t and 2.0 NA engines, 1.5t manuel ID 38248, 2.0 NA Auto ID 38247
 
+ ## Postman
+ Test 1: https://www.fueleconomy.gov/ws/rest/vehicle/38248
+ status: 200
+ Time taken : 180.24 ms
+ Format : XML
+
+ Test 2: Json
+ https://www.fueleconomy.gov/ws/rest/vehicle/38248
+ Adding header with the key 'Accept' and values 'application/json'
+ Results:  "atvType": "",
+    "barrels08": "8.500285714285715",
+    "barrelsA08": "0.0",
+    "battery": "-1",
+
+ Json with the same data, everything is in quotation, even numerical values, indicating it is a string and not a integer. The empty values are not null but are empty strings.
+
+ Test 3: A menu with some items
+ The structure of the Json while using the header 'Accept' and the value being 'application/json' is:
+ "menuItem": [
+        {
+            "text": "Acura",
+            "value": "Acura"
+        },]
+
+ Test 4: Menu with single item
+ https://www.fueleconomy.gov/ws/rest/vehicle/menu/model?year=2019&make=Bugatti
+ Status: 200
+ Time Taken: 1.97ms
+ Request result: {
+    "menuItem": {
+        "text": "Chiron",
+        "value": "Chiron"
+    }
+}
+
+ Test 5: Error cases
+ Bad ID:
+ https://www.fueleconomy.gov/ws/rest/vehicle/abc
+ Status - 404 Not found
+ Time Taken -203ms
+
+ Wrong model name -
+ https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?year=2017&make=Honda&model=Civic
+ Status - 20o
+ Time Taken - 212ms
+ Request results: null
+
+ Requests with no data:
+ https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/41952
+ Status: 204
+ Time Taken:1.98ms
+ Message: No content 
+
+ Test 6: Limits and headers
+ After retrying successful requests such as : https://www.fueleconomy.gov/ws/rest/vehicle/38247, https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgDriverVehicle/38248
+ On the headers section there was no rate limit header found so ill add my own delays between requests to be safe.
+
+  Summary of tests:
+
+ Findings:
+ - Sending the header `Accept: application/json` returns JSON; without it, the API returns XML.
+ - Every value comes back as a string, including numbers ("31", "8.5002...").
+ - Empty values come back as empty strings (""), not null. For example, sCharger and tCharger are "" on the NA Civic (38247) and atvType is "" on 38248.
+ - Some numeric fields use -1 to mean "not available" (e.g. battery, and feScore/ghgScore according to the documentation).
+ - Menus with several items return a list (`"menuItem": [ ... ]`), but a menu with one item returns a single object (`"menuItem": { ... }`) with no list.
+ - A non-numeric vehicle ID returns 404. A malformed URL (curly brackets) returned 500.
+ - A wrong model name returns an empty menu, not an error.
+ - A vehicle with no real-world data returns 204 (no content).
+ - No rate limit headers were found.
+
+ Decisions:
+ - Always send `Accept: application/json` on every request.
+ - Convert every field to its proper type in staging (numbers, dates), because nothing arrives typed.
+ - Convert empty strings to NULL in staging, so "missing" is handled the same way everywhere.
+ - Treat -1 in numeric fields as NULL, not as a real value, so it doesn't distort averages.
+ - Classify engines from tCharger/sCharger: "T" = turbocharged, "S" = supercharged, both empty = naturally aspirated.
+ - Handle menus that return either a list or a single object, otherwise single-item menus would break the script.
+ - Treat a 204 as "no data" and record it, rather than treating it as an error.
+ - Never retry a 404. Retry a 500 at most twice, with a delay.
+ - Log a warning when a menu comes back empty, because a wrong name fails silently.
+ - Pause between every request, since no rate limits are published.
+ 
