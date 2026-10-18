@@ -9,8 +9,8 @@ from pathlib import Path
 import requests
 
 BASE = "https://www.fueleconomy.gov/ws/rest/"
-DELAY = 0.2
-MAX_RETRIES = 2
+DELAY = 0.2  ##seconds between requests
+MAX_RETRIES = 2  ##attempts after a 500 or network error
 YEARS = range(2015,2021)
 
 RAW = Path(__file__).resolve().parent.parent /"data" / "raw"
@@ -20,7 +20,7 @@ session.headers.update({"Accept":"application/json"})
 
 request_count = 0
 
-def fetch(path, params=None):
+def fetch(path, params=None):  ## making one GET request, retrying 500s and network errors. Returning status and body
     global request_count
     for attempt in range(MAX_RETRIES + 1):
         time.sleep(DELAY)
@@ -39,7 +39,7 @@ def fetch(path, params=None):
     return None, None
 
 
-def parse (body, key):
+def parse (body, key): ## Turning response into a list whether API sent a list or a single object
     if not body:
         return[]
     try:
@@ -51,10 +51,10 @@ def parse (body, key):
     return value if isinstance(value, list) else [value]
 
 
-def build_url(path, params=None):
+def build_url(path, params=None):  ##Building full URL as the request would send it
     return requests.Request("GET", BASE + path, params=params).prepare().url
 
-def load_saved(file):
+def load_saved(file): ##Returning url&record for every response already saved in a jsonl file.
      saved ={}
      if file.exists():
          with open(file, encoding = "utf-8") as f:
@@ -63,7 +63,7 @@ def load_saved(file):
                  saved [record["url"]] = record
                  return saved
 
-def get(file, saved, path, params=None):
+def get(file, saved, path, params=None): ##Returning the body for a request, using the saved copy if it is there saved already
 
     url = build_url(path, params)
     if url in saved:
@@ -85,19 +85,19 @@ def get(file, saved, path, params=None):
     return None
 
 
-def safe_name(text):
+def safe_name(text): ##sensible name to use as a file name
     return "".join(c if c.isalnum()else "_" for c in text)
 
 def main(only_make = None):
-    (RAW / "shared_vehicles").mkdir(parent=True, exists_ok=True)
-    (RAW / "driver_record").mkdir(parent=True, exists_ok=True)
+    (RAW / "shared_vehicles").mkdir(parents=True, exist_ok=True)
+    (RAW / "driver_record").mkdir(parents=True, exist_ok=True)
 
     makes_file = RAW / "shared_makes.jsonl"
     models_file = RAW / "shared_models.jsonl"
     makes_saved = load_saved(makes_file)
-    models_saved = load_saved(models_saved)
+    models_saved = load_saved(models_file)
 
-    body = get(makes_file,makes_saved, "ympg/shared/menu/model", {"make":make} )
+    body = get(makes_file, makes_saved, "ympg/shared/menu/model")
     models = [item["value"] for item in parse(body,"menuItem")]
     print(f"{len(makes)}makes")
     if only_make:
