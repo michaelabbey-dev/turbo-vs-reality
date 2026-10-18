@@ -85,7 +85,49 @@ def get(file, saved, path, params=None):
     return None
 
 
+def safe_name(text):
+    return "".join(c if c.isalnum()else "_" for c in text)
 
+def main(only_make = None):
+    (RAW / "shared_vehicles").mkdir(parent=True, exists_ok=True)
+    (RAW / "driver_record").mkdir(parent=True, exists_ok=True)
+
+    makes_file = RAW / "shared_makes.jsonl"
+    models_file = RAW / "shared_models.jsonl"
+    makes_saved = load_saved(makes_file)
+    models_saved = load_saved(models_saved)
+
+    body = get(makes_file,makes_saved, "ympg/shared/menu/model", {"make":make} )
+    models = [item["value"] for item in parse(body,"menuItem")]
+    print(f"{len(makes)}makes")
+    if only_make:
+        makes = [m for m in makes if m == only_make]
+
+    for make in makes:
+        print(f"\n[make]")
+        vehicles_file = RAW / "shared_vehicles" / f"{safe_name(make)}.jsonl"
+        drivers_file = RAW / "driver_records" / f"{safe_name(make)}.jsonl"
+        vehicles_saved = load_saved(vehicles_file)
+        drivers_saved = load_saved(drivers_file)
+
+        body = get(models_file, models_saved, "ympg/shared/menu/model", {"make":make} )
+        models = [item["value"] for item in parse(body,"menuItem")]
+        
+        in_range = 0
+        for model in models:
+            body = get(vehicles_file, vehicles_saved,"ympg/shared/vehicles",{"make": make, "model":model})
+
+            for vehicle in parse(body,"vehicle"):
+                if int(vehicle["year"]) in YEARS:
+                    in_range +=1
+                    get(drivers_file, drivers_saved, f"ympg/shared/ympgDriverVehicle/{vehicle['id']}")
+
+            print(f"{len(models)} models, {in_range} vehicles in 2015-2020")
+
+        print(f"\nDone. Requests made this run :{request_count}")
+
+if __name__ == "__main__":
+    main(sys.argv[1] if len(sys.argv)> 1 else None)
     
 
 
