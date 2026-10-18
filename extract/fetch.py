@@ -51,6 +51,40 @@ def parse (body, key):
     return value if isinstance(value, list) else [value]
 
 
+def build_url(path, params=None):
+    return requests.Request("GET", BASE + path, params=params).prepare().url
+
+def load_saved(file):
+     saved ={}
+     if file.exists():
+         with open(file, encoding = "utf-8") as f:
+             for line in f :
+                 record = json.loads(line)
+                 saved [record["url"]] = record
+                 return saved
+
+def get(file, saved, path, params=None):
+
+    url = build_url(path, params)
+    if url in saved:
+        return saved[url]["body"]
+
+    status, body = fetch(path, params)
+    if status in (200,204,404):
+        record = {
+            "url": url,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "status": status,
+            "body": body,
+        }
+        with open(file, "a", encoding ="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
+        saved [url] = record
+        return body
+    print(f" gave up on {url} (status{status}), will retry on next run")
+    return None
+
+
 
     
 
