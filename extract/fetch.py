@@ -55,13 +55,15 @@ def build_url(path, params=None):  ##Building full URL as the request would send
     return requests.Request("GET", BASE + path, params=params).prepare().url
 
 def load_saved(file): ##Returning url&record for every response already saved in a jsonl file.
-     saved ={}
-     if file.exists():
-         with open(file, encoding = "utf-8") as f:
-             for line in f :
-                 record = json.loads(line)
-                 saved [record["url"]] = record
-                 return saved
+        saved ={}
+        if file.exists():
+            with open(file, encoding="utf-8") as f:
+                for line in f :
+                    record = json.loads(line)
+                    saved[record["url"]] = record
+        return saved
+
+
 
 def get(file, saved, path, params=None): ##Returning the body for a request, using the saved copy if it is there saved already
 
@@ -90,21 +92,21 @@ def safe_name(text): ##sensible name to use as a file name
 
 def main(only_make = None):
     (RAW / "shared_vehicles").mkdir(parents=True, exist_ok=True)
-    (RAW / "driver_record").mkdir(parents=True, exist_ok=True)
+    (RAW / "driver_records").mkdir(parents=True, exist_ok=True)
 
     makes_file = RAW / "shared_makes.jsonl"
     models_file = RAW / "shared_models.jsonl"
     makes_saved = load_saved(makes_file)
     models_saved = load_saved(models_file)
 
-    body = get(makes_file, makes_saved, "ympg/shared/menu/model")
-    models = [item["value"] for item in parse(body,"menuItem")]
-    print(f"{len(makes)}makes")
+    body = get(makes_file, makes_saved, "ympg/shared/menu/make")
+    makes = [item["value"] for item in parse(body,"menuItem")]
+    print(f"{len(makes)} makes")
     if only_make:
         makes = [m for m in makes if m == only_make]
 
     for make in makes:
-        print(f"\n[make]")
+        print(f"\n{make}")
         vehicles_file = RAW / "shared_vehicles" / f"{safe_name(make)}.jsonl"
         drivers_file = RAW / "driver_records" / f"{safe_name(make)}.jsonl"
         vehicles_saved = load_saved(vehicles_file)
@@ -122,9 +124,9 @@ def main(only_make = None):
                     in_range +=1
                     get(drivers_file, drivers_saved, f"ympg/shared/ympgDriverVehicle/{vehicle['id']}")
 
-            print(f"{len(models)} models, {in_range} vehicles in 2015-2020")
+        print(f"{len(models)} models, {in_range} vehicles in 2015-2020")
 
-        print(f"\nDone. Requests made this run :{request_count}")
+    print(f"\nDone. Requests made this run :{request_count}")
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv)> 1 else None)
