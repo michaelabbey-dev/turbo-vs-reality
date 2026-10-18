@@ -167,3 +167,113 @@ Dates: lastDate comes back as a timestamp with a timezone offset (e.g. 2018-02-2
  - Log a warning when a menu comes back empty, because a wrong name fails silently.
  - Pause between every request, since no rate limits are published.
  
+## Scope Decisions
+The years of vehicles i will be taking into account for this project is from 2015-2020. This is as there will be more data to be manipulated and more likey more data of driver records. Also, with this range, small cars with small turbos became more common, instead of high powered vehicles.
+
+I will be taking the shared menu approach for my style of chain menus. This style will use fewer requests as it will only use vehicles that have data.
+
+The type of vehicles in scope will only be petrol vehicles. I have decided this as diesels vehicles are designed more for long commutes, whereas petrol engines are a variantion of short and long distances. I will be exculding hybrids and EV's from this as they have too many variables such as types of batteries and other things which i must account. Also EV have estimated ranges which become heavily influenced by things such as AC, driving habits and battery health.
+
+The minimum data for a vehicle is to be decided once i see the distribution.
+
+I will be storing raw responses as one file per year, with each line holding the URL, the time the request was fetched and the response body untouched. It is worth noting the the URL as this is the point where i was see the original data compared to the manipulated data, also the time of the request fetched will be noted as .....
+
+The delay between requests will be 0.2 when i concluded test 6, there was no rate header limit  published. Also, at 5 requests per second at most ensures that my load on a free governemnt servic is light. In Postman, each request was roughly about 200ms.
+
+## 18/10/2026
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/menu/model?make=Ford
+Count: 161
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/menu/model?make=BMW
+Count: 170
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/menu/model?make=Honda
+Count: 65
+
+Avg Count: 132
+
+HONDA
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Honda&model=Civic
+Total vehicles:
+126
+2015-2020:
+2
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Honda&model=Accord
+Total vehicles:
+131
+2015-2020:
+17
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Honda&model=Odyssey
+Total vehicles:
+39
+2015-2020:
+8
+
+FORD
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Ford&model=Mustang
+Total vehicles:
+134
+2015-2020:
+9
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Ford&model=Fiesta
+Total vehicles:
+2
+2015-2020:
+0
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Ford&model=Focus
+Total vehicles:
+36
+2015-2020:
+0
+
+Mazda
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Mazda&model=MX-5
+Total vehicles:
+25
+2015-2020:
+5
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Mazda&model=6
+Total vehicles:
+45
+2015-2020:
+11
+
+https://www.fueleconomy.gov/ws/rest/ympg/shared/vehicles?make=Mazda&model=5
+
+Total vehicles:
+15
+2015-2020:
+1
+
+## Request estimate
+18/10/2026
+
+Shared makes: 71
+
+Models per make (sample of Ford 161, BMW 170, Honda 65): avg 132
+
+Vehicles per model (sample of 9 models across Honda, Ford and Mazda): 553 vehicles in total, 53 of them from 2015-2020. That is about 6 in range per model, or roughly 10% of each list.
+
+Estimate:
+- Shared makes menu: 1
+- Model menu per make: 71
+- Vehicles list per model: 71 x 132 = 9,372
+- Driver records for in range vehicles: 9,372 x 6 = 56,232
+Total ≈ 65,676 requests, at 0.4s each ≈ 7.3 hours.
+
+This estimate is most likely too high. My sample is biased towards popular makes and models (Ford and BMW are both large makes, and the models i picked are well known), whereas the full model menus include lots of older models with nothing from 2015 onwards. The 71 makes also include many small and defunct makes with far fewer models than my sample, and often nothing from 2015-2020, so the real figure should be much lower.
+A run of a few hours is fine, as i can start it and leave it, as long as the script can resume where it left off. If the real estimate came out over 8 hours, i would cut it down by using the full menus to find which model names exist in 2015-2020, and only fetching shared vehicle lists for those.
+I will log the real request count after the first full run and compare it to this estimate.
+
+Note: the shared vehicles list contains nearly full vehicle records, including year, city08, highway08, tCharger and sCharger. This means i can filter by year from the list and don't need to fetch each vehicle record separately.
+
+## Model name finding
+The Civic only had 2 vehicles in range, even though i already found two 2017 Civics with driver data (38247 and 38248). The Ford Focus had 0 in range, even though it was sold until 2018. My guess is that model names change over the years, so newer cars are listed under different names (e.g. "Civic 4Dr" or "Civic HB" instead of "Civic"). TO CHECK: look in Honda's shared model menu for other Civic entries.
+This doesn't break the plan, as the script walks every model name anyway. But when i group my results by model later, one car could be spread across several names, so i may need a cleaned up model name column.
+
+18 Oct: counted shared makes (71), models for Ford, BMW and Honda, and in range vehicles for 9 models. Estimated about 65,700 requests (≈7.3 hours), likely an overestimate. Found the shared vehicles list includes the year and near full vehicle records, so no separate vehicle record calls are needed.
