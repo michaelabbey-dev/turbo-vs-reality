@@ -7,7 +7,9 @@ The API studied for this project is from the U.S Deparment of Energy, does not r
 
 To get the data returned as JSON instead, send the request header `Accept: application/json` 
 
-https://www.fueleconomy.gov/
+## Licence check
+ https://www.fueleconomy.gov/
+  The fueleconomy.gov copyright statement says documents from the site were produced by a contractor of the U.S. Government (contract DE-AC05-00OR22725) and "may be freely distributed and used for non-commercial, scientific and educational purposes". This project is a non-commercial, educational portfolio project, so publishing the raw responses and outputs in a public repo fits within these terms. Vehicle photographs are separately copyrighted by the manufacturers, but my pipeline doesn't fetch any. The driver records are anonymous (US state only, no names), so there's no personal data concern. I will credit fueleconomy.gov as the source in the README.
 
 ## Endpoints explored
 https://www.fueleconomy.gov/ws/rest/vehicle/menu/year
@@ -52,24 +54,24 @@ I also found that when i requested for the real world MPG for 41952, there was n
 
 
 ID: 38248
- 1.5T 6s manual results:
- Engine Type: TurboCharged
- Transmission: Manual 6-spd
- Offical figures Rounded: city08:31, highway08:42, comb08:35, 
- Offical figures Unrounded: city08:30.9997, highway08:42.1485, comb08:35.1882, 
- Real world summary: avgMPG:38.280173986, recordcount:2, cityPercent:51, highwayPercent:49, maxMpg:46, minMpg:33,  
- Driver record1:Mpg:46.2, cityPercent:20, highwayPercent:80 , lastdate: 2018-02-23T00:00:00-05:00
- Driver record2:Mpg:32.678302361, cityPercent:83, highwayPercent:18, lastdate: 2018-01-04T00:00:00-05:00
+ - 1.5T 6s manual results:
+ - Engine Type: TurboCharged
+ - Transmission: Manual 6-spd
+ - Offical figures Rounded: city08:31, highway08:42, comb08:35, 
+ - Offical figures Unrounded: city08:30.9997, highway08:42.1485, comb08:35.1882, 
+ - Real world summary: avgMPG:38.280173986, recordcount:2, cityPercent:51, highwayPercent:49, maxMpg:46, minMpg:33,  
+ - Driver record1:Mpg:46.2, cityPercent:20, highwayPercent:80 , lastdate: 2018-02-23T00:00:00-05:00
+ - Driver record2:Mpg:32.678302361, cityPercent:83, highwayPercent:18, lastdate: 2018-01-04T00:00:00-05:00
 
  ID: 38247
- 2.0 NA CVT Auto results:
- Engine Type: Naturally Aspirated NA
- Transmission:Automatic (variable gear ratios) CVT
- Offical figures Rounded: city08:28, highway08:40, comb08:32, 
- Offical figures Unrounded: city08:28.0, highway08:40.0499, comb08:32.3846, 
- Real world summary: avgMPG:57.0, recordcount:1, cityPercent:10, highwayPercent:90, maxMpg:57, minMpg:57,  
- Driver record:Mpg:57, cityPercent:10, highwayPercent:90, recordCount: 1, lastdate: 2020-05-30T00:00:00-04:00
-Side note: no results for manual 2.0 NA engine
+ - 2.0 NA CVT Auto results:
+ - Engine Type: Naturally Aspirated NA
+ - Transmission:Automatic (variable gear ratios) CVT
+ - Offical figures Rounded: city08:28, highway08:40, comb08:32, 
+ - Offical figures Unrounded: city08:28.0, highway08:40.0499, comb08:32.3846, 
+ - Real world summary: avgMPG:57.0, recordcount:1, cityPercent:10, highwayPercent:90, maxMpg:57, minMpg:57,  
+ - Driver record:Mpg:57, cityPercent:10, highwayPercent:90, recordCount: 1, lastdate: 2020-05-30T00:00:00-04:00
+- Side note: no results for manual 2.0 NA engine
 
 The comparisons of these two results show that the gap for Naturally Aspirated engines and Turbocharged is massive, however these results tell me a lot and nothing at the same time.
 First off, the sample used for the Civics is tiny, there is a total of 3 driver records, which indicates that there should be a minimun recordCount before using a vehicles real-world figures.
@@ -87,14 +89,14 @@ Dates: lastDate comes back as a timestamp with a timezone offset (e.g. 2018-02-2
 
  ## Postman
  Test 1: https://www.fueleconomy.gov/ws/rest/vehicle/38248
- status: 200
- Time taken : 180.24 ms
- Format : XML
+ - status: 200
+ - Time taken : 180.24 ms
+ - Format : XML
 
  Test 2: Json
- https://www.fueleconomy.gov/ws/rest/vehicle/38248
- Adding header with the key 'Accept' and values 'application/json'
- Results:  "atvType": "",
+ - https://www.fueleconomy.gov/ws/rest/vehicle/38248
+ - Adding header with the key 'Accept' and values 'application/json'
+ - Results:  "atvType": "",
     "barrels08": "8.500285714285715",
     "barrelsA08": "0.0",
     "battery": "-1",
@@ -111,9 +113,9 @@ Dates: lastDate comes back as a timestamp with a timezone offset (e.g. 2018-02-2
 
  Test 4: Menu with single item
  https://www.fueleconomy.gov/ws/rest/vehicle/menu/model?year=2019&make=Bugatti
- Status: 200
- Time Taken: 1.97ms
- Request result: {
+ - Status: 200
+ - Time Taken: 1.97ms
+ - Request result: {
     "menuItem": {
         "text": "Chiron",
         "value": "Chiron"
@@ -121,26 +123,26 @@ Dates: lastDate comes back as a timestamp with a timezone offset (e.g. 2018-02-2
 }
 
  Test 5: Error cases
- Bad ID:
- https://www.fueleconomy.gov/ws/rest/vehicle/abc
- Status - 404 Not found
- Time Taken -203ms
+ - Bad ID:
+ - https://www.fueleconomy.gov/ws/rest/vehicle/abc
+ - Status - 404 Not found
+ - Time Taken -203ms
 
  Wrong model name -
- https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?year=2017&make=Honda&model=Civic
- Status - 20o
- Time Taken - 212ms
- Request results: null
+ - https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?year=2017&make=Honda&model=Civic
+ - Status - 20o
+ - Time Taken - 212ms
+ - Request results: null
 
  Requests with no data:
- https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/41952
- Status: 204
- Time Taken:1.98ms
- Message: No content 
+ - https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/41952
+ - Status: 204
+ - Time Taken:1.98ms
+ - Message: No content 
 
  Test 6: Limits and headers
- After retrying successful requests such as : https://www.fueleconomy.gov/ws/rest/vehicle/38247, https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgDriverVehicle/38248
- On the headers section there was no rate limit header found so ill add my own delays between requests to be safe.
+ - After retrying successful requests such as : https://www.fueleconomy.gov/ws/rest/vehicle/38247, - https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgDriverVehicle/38248
+-  On the headers section there was no rate limit header found so ill add my own delays between requests to be safe.
 
   Summary of tests:
 
@@ -251,7 +253,6 @@ Total vehicles:
 1
 
 ## Request estimate
-18/10/2026
 
 Shared makes: 71
 
@@ -276,4 +277,9 @@ Note: the shared vehicles list contains nearly full vehicle records, including y
 The Civic only had 2 vehicles in range, even though i already found two 2017 Civics with driver data (38247 and 38248). The Ford Focus had 0 in range, even though it was sold until 2018. My guess is that model names change over the years, so newer cars are listed under different names (e.g. "Civic 4Dr" or "Civic HB" instead of "Civic"). TO CHECK: look in Honda's shared model menu for other Civic entries.
 This doesn't break the plan, as the script walks every model name anyway. But when i group my results by model later, one car could be spread across several names, so i may need a cleaned up model name column.
 
-18 Oct: counted shared makes (71), models for Ford, BMW and Honda, and in range vehicles for 9 models. Estimated about 65,700 requests (≈7.3 hours), likely an overestimate. Found the shared vehicles list includes the year and near full vehicle records, so no separate vehicle record calls are needed.
+## 18 Oct
+ Counted shared makes (71), models for Ford, BMW and Honda, and in range vehicles for 9 models. Estimated about 65,700 requests (≈7.3 hours), likely an overestimate. Found the shared vehicles list includes the year and near full vehicle records, so no separate vehicle record calls are needed.
+
+ ## (19 Oct)
+Real-world check
+A full Honda run took ~185 requests (65 models, 118 vehicles in 2015-2020, ~1.8 per model vs my estimate of 6). Using Honda as an upper bound: 71 x 185 ≈ 13,000 requests ≈ 1.5 hours, much lower than my original estimate of 65,676, which confirms my sample was biased towards popular models.
