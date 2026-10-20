@@ -1,0 +1,1 @@
+{"url": "https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgDriverVehicle/36935", "fetched_at": "2026-10-19T08:20:01.238511+00:00", "status": 200, "body": "{\"yourMpgDriverVehicle\":{\"cityPercent\":\"30\",\"highwayPercent\":\"70\",\"lastDate\":\"2023-11-01T00:00:00-04:00\",\"mpg\":\"45.9\",\"state\":\"IL\",\"vehicleId\":\"36935\"}}"}

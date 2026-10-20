@@ -1,0 +1,1 @@
+{"url": "https://www.fueleconomy.gov/ws/rest/ympg/shared/ympgDriverVehicle/38137", "fetched_at": "2026-10-19T07:58:04.659833+00:00", "status": 200, "body": "{\"yourMpgDriverVehicle\":{\"cityPercent\":\"50\",\"highwayPercent\":\"50\",\"lastDate\":\"2013-03-27T00:00:00-04:00\",\"mpg\":\"19.0\",\"state\":\"TX\",\"vehicleId\":\"38137\"}}"}
