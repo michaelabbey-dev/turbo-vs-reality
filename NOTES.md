@@ -280,6 +280,9 @@ This doesn't break the plan, as the script walks every model name anyway. But wh
 ## 18 Oct
  Counted shared makes (71), models for Ford, BMW and Honda, and in range vehicles for 9 models. Estimated about 65,700 requests (≈7.3 hours), likely an overestimate. Found the shared vehicles list includes the year and near full vehicle records, so no separate vehicle record calls are needed.
 
- ## (19 Oct)
+ ## 19 Oct
 Real-world check
 A full Honda run took ~185 requests (65 models, 118 vehicles in 2015-2020, ~1.8 per model vs my estimate of 6). Using Honda as an upper bound: 71 x 185 ≈ 13,000 requests ≈ 1.5 hours, much lower than my original estimate of 65,676, which confirms my sample was biased towards popular models.
+
+## 20 Oct
+Full run: 3,972 requests in about 40 minutes (~0.6s per request including the 0.2s delay). This is far below my original estimate of 65,676 requests (7.3 hours) and my Honda-based revised estimate of ~13,000. My sample of popular makes and models heavily overestimated the totals, as most of the 71 makes are small or defunct with few or no vehicles from 2015-2020. A second run made 0 requests, confirming the dataset is complete. Failed requests that were never saved: 1.
