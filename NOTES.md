@@ -267,22 +267,57 @@ Estimate:
 - Driver records for in range vehicles: 9,372 x 6 = 56,232
 Total ≈ 65,676 requests, at 0.4s each ≈ 7.3 hours.
 
-This estimate is most likely too high. My sample is biased towards popular makes and models (Ford and BMW are both large makes, and the models i picked are well known), whereas the full model menus include lots of older models with nothing from 2015 onwards. The 71 makes also include many small and defunct makes with far fewer models than my sample, and often nothing from 2015-2020, so the real figure should be much lower.
-A run of a few hours is fine, as i can start it and leave it, as long as the script can resume where it left off. If the real estimate came out over 8 hours, i would cut it down by using the full menus to find which model names exist in 2015-2020, and only fetching shared vehicle lists for those.
+- This estimate is most likely too high. My sample is biased towards popular makes and models (Ford and BMW are both large makes, and the models i picked are well known), whereas the full model menus include lots of older models with nothing from 2015 onwards. The 71 makes also include many small and defunct makes with far fewer models than my sample, and often nothing from 2015-2020, so the real figure should be much lower.
+- A run of a few hours is fine, as i can start it and leave it, as long as the script can resume where it left off. If the real estimate came out over 8 hours, i would cut it down by using the full menus to find which model names exist in 2015-2020, and only fetching shared vehicle lists for those.
 I will log the real request count after the first full run and compare it to this estimate.
 
-Note: the shared vehicles list contains nearly full vehicle records, including year, city08, highway08, tCharger and sCharger. This means i can filter by year from the list and don't need to fetch each vehicle record separately.
+-Note: the shared vehicles list contains nearly full vehicle records, including year, city08, highway08, tCharger and sCharger. This means i can filter by year from the list and don't need to fetch each vehicle record separately.
 
 ## Model name finding
-The Civic only had 2 vehicles in range, even though i already found two 2017 Civics with driver data (38247 and 38248). The Ford Focus had 0 in range, even though it was sold until 2018. My guess is that model names change over the years, so newer cars are listed under different names (e.g. "Civic 4Dr" or "Civic HB" instead of "Civic"). TO CHECK: look in Honda's shared model menu for other Civic entries.
-This doesn't break the plan, as the script walks every model name anyway. But when i group my results by model later, one car could be spread across several names, so i may need a cleaned up model name column.
+- The Civic only had 2 vehicles in range, even though i already found two 2017 Civics with driver data (38247 and 38248). The Ford Focus had 0 in range, even though it was sold until 2018. My guess is that model names change over the years, so newer cars are listed under different names (e.g. "Civic 4Dr" or "Civic HB" instead of "Civic"). TO CHECK: look in Honda's shared model menu for other Civic entries.
+- This doesn't break the plan, as the script walks every model name anyway. But when i group my results by model later, one car could be spread across several names, so i may need a cleaned up model name column.
 
 ## 18 Oct
- Counted shared makes (71), models for Ford, BMW and Honda, and in range vehicles for 9 models. Estimated about 65,700 requests (≈7.3 hours), likely an overestimate. Found the shared vehicles list includes the year and near full vehicle records, so no separate vehicle record calls are needed.
+ - Counted shared makes (71), models for Ford, BMW and Honda, and in range vehicles for 9 models. Estimated about 65,700 requests (≈7.3 hours), likely an overestimate. Found the shared vehicles list includes the year and near full vehicle records, so no separate vehicle record calls are needed.
 
  ## 19 Oct
 Real-world check
-A full Honda run took ~185 requests (65 models, 118 vehicles in 2015-2020, ~1.8 per model vs my estimate of 6). Using Honda as an upper bound: 71 x 185 ≈ 13,000 requests ≈ 1.5 hours, much lower than my original estimate of 65,676, which confirms my sample was biased towards popular models.
+- A full Honda run took ~185 requests (65 models, 118 vehicles in 2015-2020, ~1.8 per model vs my estimate of 6). Using Honda as an upper bound: 71 x 185 ≈ 13,000 requests ≈ 1.5 hours, much lower than my original estimate of 65,676, which confirms my sample was biased towards popular models.
 
 ## 20 Oct
-Full run: 3,972 requests in about 40 minutes (~0.6s per request including the 0.2s delay). This is far below my original estimate of 65,676 requests (7.3 hours) and my Honda-based revised estimate of ~13,000. My sample of popular makes and models heavily overestimated the totals, as most of the 71 makes are small or defunct with few or no vehicles from 2015-2020. A second run made 0 requests, confirming the dataset is complete. Failed requests that were never saved: 1.
+- Full run: 3,972 requests in about 40 minutes (~0.6s per request including the 0.2s delay). This is far below my original estimate of 65,676 requests (7.3 hours) and my Honda-based revised estimate of ~13,000. My sample of popular makes and models heavily overestimated the totals, as most of the 71 makes are small or defunct with few or no vehicles from 2015-2020. A second run made 0 requests, confirming the dataset is complete. Failed requests that were never saved: 1.
+
+## Exploring the raw data in DuckDB (20-21 Oct)
+- I loaded the raw .jsonl files into DuckDB with read_json, keeping the body as plain text so nothing is changed on the way in. The script for this is in transform/explore.py.
+
+How i turned the raw responses into rows:
+- read_json reads every make file at once using a wildcard (*.jsonl), so new makes are picked up automatically.
+- The API sometimes returns a single object instead of a list (Test 4, Bugatti). In SQL i wrapped the single objects in a list with json_array, so every response can be handled the same way.
+- unnest turns each list into one row per vehicle (or one row per driver record).
+- v->>'field' pulls a field out of a vehicle as text.
+
+Checks i ran and what they showed:
+- All 2,380 vehicle list responses were status 200. There were no 204s, so every shared model had at least one vehicle.
+- 14,450 vehicles across all years, and 14,450 unique vehicle IDs. No vehicle appears in more than one model list, so no deduplication is needed.
+- 1,519 vehicles are in 2015-2020. This matches the driver record requests from the full run: 3,972 total requests - 1 makes menu - 71 model menus - 2,380 vehicle lists = 1,520, with the extra 1 being the dropped connection that was retried. Two separate counts agreeing shows the extraction is complete.
+- Turbos became far more common over time: about 2% of vehicles in 1993 compared to about 40% in 2018 and 46% in 2024. Newer years have fewer vehicles overall, as newer cars have had less time to collect driver submissions.
+
+Engine types (2015-2020, before fuel rules):
+- 531 turbocharged and 21 supercharged. 18 of the 21 supercharged vehicles also have a turbo (twincharged), so only 3 are supercharged alone.
+- Decision: i am excluding all supercharged vehicles, including the twincharged ones, from the comparison. 21 vehicles is too few to draw anything reliable from, and twincharged engines don't fit a turbo vs naturally aspirated question. I will report their count.
+
+Fuel types (2015-2020):
+- Kept: petrol with no atvType. Regular Gasoline 895, Premium Gasoline 252, Midgrade Gasoline 21 = 1,168 vehicles.
+- Removed: hybrids 128, diesel 67, plug-in hybrids 61, flex-fuel 57, electric 38 = 351 vehicles.
+- 1,168 + 351 = 1,519, so every vehicle is accounted for.
+- Rule in SQL: fuelType1 contains "Gasoline" and atvType is empty.
+
+Driver records:
+- 3,325 driver records across all 1,519 vehicles in range, about 2.2 drivers per vehicle.
+- City + highway percentage totals: 2,794 are exactly 100, 67 are 101 or 99 (rounding), and 464 are 0/0 (the driver never entered their mix). There are no other values.
+- Vehicle 41393 has drivers reporting 80.8 and 70.2 mpg, which is very high for petrol. It is probably a hybrid that my scope removes; if not, it's a case for the outlier flag.
+
+Bug found and fixed:
+- In DuckDB the ->> operator is applied after AND, so `v->>'tCharger' = 'T' AND v->>'sCharger' = 'S'` was read the wrong way and errored. Wrapping each lookup in brackets, `(v->>'tCharger') = 'T'`, fixed it. Any query combining conditions needs brackets around each field lookup.
+
+## 21 Oct: explored the raw data in DuckDB. Confirmed the extraction is complete (1,519 vehicles in range matches the driver record requests), found the 0/0 driving mix records, decided to exclude supercharged and twincharged vehicles, and set the fuel type rule.
