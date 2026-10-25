@@ -321,3 +321,13 @@ Bug found and fixed:
 - In DuckDB the ->> operator is applied after AND, so `v->>'tCharger' = 'T' AND v->>'sCharger' = 'S'` was read the wrong way and errored. Wrapping each lookup in brackets, `(v->>'tCharger') = 'T'`, fixed it. Any query combining conditions needs brackets around each field lookup.
 
 ## 21 Oct: explored the raw data in DuckDB. Confirmed the extraction is complete (1,519 vehicles in range matches the driver record requests), found the 0/0 driving mix records, decided to exclude supercharged and twincharged vehicles, and set the fuel type rule.
+
+## Staging layer (25 Oct)
+transform/01_staging.sql turns the raw responses into typed tables. Staging only changes how values are represented (text to numbers, empty strings to NULL); no business rules are applied here, so it's clear where each decision happens.
+- raw_vehicle_lists (2,380 rows) and raw_driver_lists (1,519 rows): every saved response, as written.
+- stg_vehicles (14,450 rows): one row per vehicle, all years. I kept about 20 of the ~80 fields the API returns, only those my question needs; the rest stay in the raw files.
+- stg_driver_records (3,325 rows): one row per driver record. The API gives driver records no ID, so each gets one from its vehicle ID and its position in the list (e.g. 38248-1). This is the same on every run.
+- The API uses 0 for "unrounded MPG not available", so those become NULL rather than a 0 that would distort averages.
+- I use CAST rather than TRY_CAST so the pipeline fails loudly on an unexpected value instead of silently turning it into NULL.
+- CREATE OR REPLACE rebuilds every table from the raw files each run. I ran the pipeline 3 times and got identical row counts, so re-running doesn't create duplicates.
+- pipeline.py runs every numbered SQL file in transform/ in order, into turbo.duckdb (which is not committed, as it's rebuilt from the raw files).

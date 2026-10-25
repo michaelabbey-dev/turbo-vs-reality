@@ -70,7 +70,43 @@ SELECT
     NULLIF(CAST(NULLIF(v->>'highway08U', '') AS DOUBLE), 0) AS highway_mpg_unrounded,
     NULLIF(CAST(NULLIF(v->>'comb08U', '') AS DOUBLE), 0) AS combined_mpg_unrounded,
 
-    -- lineage: where and when this row came from
+    -- lineage: where and when this row comes from
     url AS source_url,
     CAST(fetched_at AS TIMESTAMPTZ)AS fetched_at
+FROM items;
+
+
+-- stg_driver_records: one row per driver record
+CREATE OR REPLACE TABLE stg_driver_records AS
+WITH as_arrays AS (
+    SELECT
+        url,
+        fetched_at,
+        CASE WHEN json_type(body, '$.yourMpgDriverVehicle') = 'ARRAY'
+             THEN json_extract(body, '$.yourMpgDriverVehicle')
+             ELSE json_array(json_extract(body, '$.yourMpgDriverVehicle'))
+        END AS drivers
+    FROM raw_driver_lists
+    WHERE status = 200
+),
+as_lists AS (
+    SELECT url, fetched_at, from_json(drivers, '["JSON"]') AS driver_list
+    FROM as_arrays
+),
+items AS (
+    -- Keep each record's position in its list, so every row has a stable ID
+    -- that is the same every time the pipeline runs.
+    SELECT url, fetched_at, i + 1 AS record_number, driver_list[i + 1] AS d
+    FROM as_lists, unnest(range(len(driver_list))) AS t(i)
+)
+SELECT
+    CAST(d->>'vehicleId' AS INTEGER) || '-' || record_number AS driver_record_id,
+    CAST(d->>'vehicleId' AS INTEGER) AS vehicle_id,
+    CAST(d->>'mpg' AS DOUBLE) AS reported_mpg,
+    CAST(NULLIF(d->>'cityPercent', '') AS DOUBLE) AS city_percent_raw,
+    CAST(NULLIF(d->>'highwayPercent', '') AS DOUBLE) AS highway_percent_raw,
+    NULLIF(d->>'state', '') AS state,
+    NULLIF(d->>'lastDate', '') AS last_date_raw,
+    url AS source_url,
+    CAST(fetched_at AS TIMESTAMPTZ) AS fetched_at
 FROM items;
