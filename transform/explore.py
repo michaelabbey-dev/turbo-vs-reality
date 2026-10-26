@@ -2,6 +2,7 @@ import duckdb
 
 con = duckdb.connect()
 
+
 # Every saved response for the shared vehicles lists, one row per line in the files
 con.sql("""
 CREATE OR REPLACE VIEW raw_vehicles AS

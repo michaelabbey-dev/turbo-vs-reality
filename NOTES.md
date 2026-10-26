@@ -331,3 +331,17 @@ transform/01_staging.sql turns the raw responses into typed tables. Staging only
 - I use CAST rather than TRY_CAST so the pipeline fails loudly on an unexpected value instead of silently turning it into NULL.
 - CREATE OR REPLACE rebuilds every table from the raw files each run. I ran the pipeline 3 times and got identical row counts, so re-running doesn't create duplicates.
 - pipeline.py runs every numbered SQL file in transform/ in order, into turbo.duckdb (which is not committed, as it's rebuilt from the raw files).
+
+## Clean layer (26 Oct)
+transform/02_clean.sql applies the project's rules. In-range vehicles that are out of scope aren't deleted; they get an exclusion_reason and in_scope = false, so the counts can be reported.
+
+Results:
+- 1,519 vehicles in 2015-2020. 1,152 in scope: 432 turbocharged, 720 naturally aspirated.
+- Excluded for fuel type: 351 (diesel 67, hybrid 128, plug-in hybrid 61, flex-fuel 57, electric 38).
+- Excluded as supercharged: 16 petrol cars (10 supercharged, 6 twincharged). 1,152 + 16 = 1,168 petrol cars, matching my exploration.
+- Correction: my earlier "18 of 21 superchargers are twincharged" counted all years. Within 2015-2020 there are 9 twincharged and 12 supercharged-only.
+- 2,251 in-scope driver records: 1,943 with a known driving mix, 308 without (0/0).
+- My 50% outlier rule flags 23 in-scope records (about 1%), so it only catches extreme values. Among out-of-scope vehicles it flags 17%, as hybrids and EVs behave differently. This supports excluding them.
+- 0 orphan driver records: every driver record matches a vehicle.
+
+Engine type is checked in order (twincharged first), as twincharged cars have both flags and would otherwise be labelled turbocharged.
