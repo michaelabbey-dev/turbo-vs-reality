@@ -345,3 +345,22 @@ Results:
 - 0 orphan driver records: every driver record matches a vehicle.
 
 Engine type is checked in order (twincharged first), as twincharged cars have both flags and would otherwise be labelled turbocharged.
+
+## 28 Oct: Final layer
+- built the final layer (03_final.sql) with three tables: one row per driver comparing their real MPG against an expected MPG for their own driving mix, one row per vehicle, and a turbo vs naturally aspirated summary overall and by vehicle class.
+-  Tested it against my hand calculations for the Civic (38.28 mpg matches the API's own avgMpg) and all counts reconcile (2,251 in-scope drivers, 2,228 after 23 outliers).
+- First answer: both engine types land within about 1% of their official figures (turbo +0.6%, NA -0.8% median).
+- Ran three robustness checks: the difference is tiny compared with the spread between drivers (middle 50% roughly -9% to +9%), it holds whichever way expected MPG is calculated, and it holds within vehicle classes. 
+-Found that vehicle class matters more than engine type: small cars beat their figures, SUVs and pickups fall short. Decided on no minimum driver count for the headline, and confidence labels for individual cars in the app, as 60% of vehicles have only one driver.
+
+## Findings
+
+- For 2015–2020 petrol cars, real-world MPG reported by drivers lands within about 1% of the official figure for both turbocharged and naturally aspirated engines, once each driver’s mix of city and highway driving is accounted for. The difference between the two engine types is small compared with how much individual drivers vary, and it holds within vehicle classes. Vehicle class matters more as small cars tend to beat their official figures, while SUVs and pickups tend to fall short.
+
+- Limitations
+    - Thin data per car. 60% of the cars only have 1 driver record.This is weak for a single car but fine for the overall answer (2,228 cars).
+    - Self selected drivers. Indivduals who are logging on the government mpg site are realistcally careful and fuel effecient drivers. That could potentially push both groups up. Comparison is still fair as it probably happens across both groups.
+    - US data only. Some of th engines and models differ from the UK.
+    - Some other factors are not controlled. Transmission and or model year were not controlled for whereas engine type and fuel type are. Could be grounds for improvement.
+    
+
