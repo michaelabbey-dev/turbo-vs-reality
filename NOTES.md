@@ -362,5 +362,13 @@ Engine type is checked in order (twincharged first), as twincharged cars have bo
     - Self selected drivers. Indivduals who are logging on the government mpg site are realistcally careful and fuel effecient drivers. That could potentially push both groups up. Comparison is still fair as it probably happens across both groups.
     - US data only. Some of th engines and models differ from the UK.
     - Some other factors are not controlled. Transmission and or model year were not controlled for whereas engine type and fuel type are. Could be grounds for improvement.
+
+#30 Oct
+Testing on a another device, snags encountered:
+- python must be installed(wasnt installed on this device)
+- git must be installed(wasnt installed on this device)
+- when activating the virtual environment, encounter error that scripts are disabled
+- bypass this error with Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+- downloading the requirements , error generating package metadata: numpy
     
 
